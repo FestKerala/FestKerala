@@ -5,8 +5,8 @@
   --font-display: "Bricolage Grotesque", system-ui, sans-serif;
   --font-mono: "DM Mono", monospace;
 
-  --color-void: #0a0a0a;
-  --color-surface: #111111;
+  --color-void: #000000;
+  --color-surface: #0b0b0b;
   --color-panel: #1a1a1a;
   --color-border: #2a2a2a;
   --color-ghost: #333333;
@@ -30,7 +30,7 @@ body {
   width: 100%;
   min-width: 0;
   overflow-x: hidden;
-  background-color: #0a0a0a;
+  background-color: #000;
   color: #f2f2f2;
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
@@ -44,8 +44,8 @@ body {
 
 /* Buttons */
 .btn-glow {
-  background: #7c3aed;
-  color: #fff;
+  background: #d8ff3e;
+  color: #000;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 13px;
@@ -55,8 +55,7 @@ body {
   border: none;
   cursor: pointer;
   box-shadow:
-    0 0 20px rgba(124, 58, 237, 0.45),
-    0 0 40px rgba(124, 58, 237, 0.15);
+    0 0 20px rgba(216, 255, 62, 0.2);
   transition:
     box-shadow 0.2s ease,
     opacity 0.2s ease,
@@ -65,8 +64,7 @@ body {
 }
 .btn-glow:hover {
   box-shadow:
-    0 0 28px rgba(124, 58, 237, 0.65),
-    0 0 56px rgba(124, 58, 237, 0.25);
+    0 0 28px rgba(216, 255, 62, 0.34);
   opacity: 0.95;
   transform: translateY(-1px);
 }
@@ -83,15 +81,15 @@ body {
   width: 54px;
   height: 54px;
   border-radius: 50%;
-  background: #7c3aed;
-  color: #fff;
+  background: #d8ff3e;
+  color: #000;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow:
-    0 0 20px rgba(124, 58, 237, 0.55),
+    0 0 20px rgba(216, 255, 62, 0.35),
     0 4px 16px rgba(0, 0, 0, 0.5);
   transition:
     transform 0.15s ease,
@@ -100,7 +98,7 @@ body {
 .btn-fab:hover {
   transform: scale(1.08);
   box-shadow:
-    0 0 32px rgba(124, 58, 237, 0.7),
+    0 0 32px rgba(216, 255, 62, 0.5),
     0 4px 24px rgba(0, 0, 0, 0.5);
 }
 
@@ -140,7 +138,7 @@ body {
 }
 .fest-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 16px 48px rgba(216, 255, 62, 0.1);
 }
 
 /* Modal */
@@ -170,7 +168,7 @@ body {
   transition: border-color 0.15s;
 }
 .field:focus {
-  border-color: #7c3aed;
+  border-color: #d8ff3e;
 }
 .field::placeholder {
   color: #555;
@@ -209,6 +207,6 @@ select.field option {
 }
 .dropzone.active,
 .dropzone:hover {
-  border-color: #7c3aed;
-  background: rgba(124, 58, 237, 0.05);
+  border-color: #d8ff3e;
+  background: rgba(216, 255, 62, 0.05);
 }
