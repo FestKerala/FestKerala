@@ -6,6 +6,7 @@ import {
   type DragEvent,
   type ChangeEvent,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "./lib/supabase";
 import logoUrl from "./logo.svg";
 import {
@@ -199,225 +200,6 @@ function MasonryGrid({
           ))}
         </div>
       ))}
-    </div>
-  );
-}
-
-// DetailModal component
-
-function DetailModal({ fest, onClose }: { fest: Fest; onClose: () => void }) {
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const [shareStatus, setShareStatus] = useState<"idle" | "copied">("idle");
-  const handleBackdrop = (e: React.MouseEvent) => {
-    if (e.target === backdropRef.current) onClose();
-  };
-
-  const shareFest = async () => {
-    const shareText = `${fest.fest_name} at ${fest.college_name} — ${formatDateRange(fest.start_date, fest.end_date)}, ${fest.district}.`;
-    const shareData = {
-      title: `${fest.fest_name} | Fest Kerala`,
-      text: shareText,
-      url: fest.registration_link,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        return;
-      }
-      await navigator.clipboard.writeText(`${shareText}\n${fest.registration_link}`);
-      setShareStatus("copied");
-      window.setTimeout(() => setShareStatus("idle"), 2000);
-    } catch (error) {
-      if ((error as DOMException).name !== "AbortError") {
-        console.error("Unable to share fest", error);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
-
-  return (
-    <div ref={backdropRef} className="modal-backdrop" onClick={handleBackdrop}>
-      <div
-        className="relative w-full max-w-lg rounded-2xl overflow-hidden"
-        style={{
-          background: "#111",
-          border: "1px solid #2a2a2a",
-          maxHeight: "90vh",
-          overflowY: "auto",
-        }}
-      >
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 z-10 w-8 h-8 flex items-center justify-center rounded-full"
-          style={{
-            background: "rgba(0,0,0,0.6)",
-            color: "#aaa",
-            border: "1px solid #333",
-            cursor: "pointer",
-          }}
-          aria-label="Close"
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path
-              d="M1 1L13 13M13 1L1 13"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
-
-        <div
-          className="relative flex items-center justify-center"
-          style={{ maxHeight: 420, overflow: "hidden", background: "#000" }}
-        >
-          <img
-            src={fest.poster_image_url}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full object-cover"
-            style={{
-              filter: "blur(24px) brightness(0.5)",
-              transform: "scale(1.1)",
-            }}
-          />
-
-          <img
-            src={fest.poster_image_url}
-            alt={fest.fest_name}
-            className="relative w-full block object-contain"
-            style={{ maxHeight: 420 }}
-          />
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to top, rgba(17,17,17,1) 0%, rgba(17,17,17,0.15) 35%, transparent 65%)",
-            }}
-          />
-        </div>
-
-        <div className="px-5 pb-6 pt-2">
-          <div className="flex flex-wrap gap-1.5 mb-3">
-            {fest.tags.map((tag) => (
-              <TagPill key={tag} tag={tag} />
-            ))}
-          </div>
-
-          <h2
-            className="text-white font-bold text-2xl leading-tight mb-1"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            {fest.fest_name}
-          </h2>
-
-          <p
-            className="text-[13px] mb-4"
-            style={{ color: "#999", fontFamily: "var(--font-mono)" }}
-          >
-            {fest.college_name}
-          </p>
-
-          <div className="flex flex-col gap-2 mb-6">
-            <div className="flex items-center gap-2">
-              <span
-                style={{
-                  color: "#555",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                  width: 60,
-                }}
-              >
-                DATE
-              </span>
-              <span
-                style={{
-                  color: "#ccc",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                }}
-              >
-                {formatDateRange(fest.start_date, fest.end_date)}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span
-                style={{
-                  color: "#555",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 11,
-                  width: 60,
-                }}
-              >
-                DISTRICT
-              </span>
-              <span
-                style={{
-                  color: "#ccc",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 13,
-                }}
-              >
-                {fest.district}
-              </span>
-            </div>
-          </div>
-          <div className="mb-6">
-            <p style={{ color: "#555", fontFamily: "var(--font-mono)", fontSize: 11, marginBottom: 4 }}>
-              ABOUT THE FEST
-            </p>
-            <p style={{ color: "#ccc", fontFamily: "var(--font-display)", fontSize: 13, lineHeight: 1.6 }}>
-              {fest.description || "No description provided."}
-            </p>
-          </div>
-          <div className="flex items-stretch gap-2">
-            <a
-              href={fest.registration_link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-glow block text-center flex-1"
-              style={{
-                display: "block",
-                textDecoration: "none",
-                padding: "12px 20px",
-                borderRadius: 12,
-                fontSize: 14,
-              }}
-            >
-              Register / Event Link →
-            </a>
-            <button
-              type="button"
-              onClick={shareFest}
-              className="flex h-11 w-11 items-center justify-center shrink-0 rounded-full transition-colors"
-              style={{
-                color: shareStatus === "copied" ? "#86efac" : "#d4d4d4",
-                background:
-                  shareStatus === "copied" ? "rgba(34,197,94,0.12)" : "#1a1a1a",
-                border:
-                  shareStatus === "copied"
-                    ? "1px solid rgba(34,197,94,0.35)"
-                    : "1px solid #333",
-                cursor: "pointer",
-              }}
-              aria-label={shareStatus === "copied" ? "Fest link copied" : "Share this fest"}
-              title={shareStatus === "copied" ? "Copied" : "Share fest"}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M12 16V3m0 0L7 8m5-5 5 5M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
@@ -1133,9 +915,7 @@ function Header({
     <header
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 sm:px-6 lg:px-16 py-3 transition-all duration-300"
       style={{
-        background: scrolled
-          ? "rgba(10, 10, 10, 0.76)"
-          : "rgba(15, 15, 15, 0.56)",
+        background: scrolled ? "rgba(0, 0, 0, 0.92)" : "rgba(0, 0, 0, 0.7)",
         backdropFilter: "blur(18px)",
         WebkitBackdropFilter: "blur(18px)",
         borderBottom: scrolled
@@ -1194,7 +974,7 @@ function Header({
           style={{
             background: "#1a1a1a",
             border: "1px solid #2a2a2a",
-            color: "#a78bfa",
+            color: "#ffdd55",
           }}
         >
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
@@ -1211,8 +991,8 @@ function Header({
           onClick={onPostClick}
           className="flex items-center gap-1.5"
           style={{
-            background: "#f8f8f8",
-            color: "#0a0a0a",
+            background: "#d8ff3e",
+            color: "#000",
             fontFamily: "var(--font-display)",
             fontWeight: 600,
             fontSize: 13,
@@ -1226,7 +1006,7 @@ function Header({
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path
               d="M7 1v12M1 7h12"
-              stroke="#0a0a0a"
+              stroke="#000"
               strokeWidth="2"
               strokeLinecap="round"
             />
@@ -1262,17 +1042,17 @@ function FilterBar({
       className="sticky z-40 px-4 py-3 sm:px-6 lg:px-16"
       style={{
         top: 72,
-        background: "rgba(10, 10, 10, 0.96)",
+        background: "rgba(0, 0, 0, 0.96)",
         borderBottom: "1px solid #1e1e1e",
       }}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="max-w-4xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
           <input
             type="search"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Search fests, colleges, districts, tags..."
+            placeholder="Search festivals, colleges, artists..."
             className="field w-full text-[13px] rounded-full"
             style={{ padding: "14px 16px" }}
           />
@@ -1284,7 +1064,7 @@ function FilterBar({
             onChange={(e) => onDistrictChange(e.target.value)}
             className="appearance-none text-[13px] pl-3.5 pr-8 py-2 rounded-full cursor-pointer outline-none w-full"
             style={{
-              background: "#1a1a1a",
+              background: "#111",
               color: "#d4d4d4",
               border: "1px solid #2a2a2a",
               fontFamily: "var(--font-display)",
@@ -1315,14 +1095,14 @@ function FilterBar({
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
+            <div className="max-w-4xl mx-auto mt-3 flex flex-nowrap overflow-x-auto pb-1 gap-1.5 sm:gap-2">
         <button
           type="button"
           onClick={() => onCategoryChange("All")}
-          className={`text-[13px] px-3 py-1.5 rounded-full border transition ${
+          className={`shrink-0 text-[11px] sm:text-[13px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition ${
             category === "All"
-              ? "bg-violet-500/18 text-violet-200 border-violet-500/35"
-              : "bg-[#151515] text-[#ccc] border-border hover:border-violet-500/35"
+              ? "bg-[#d8ff3e] text-black border-[#d8ff3e]"
+              : "bg-[#111] text-[#ccc] border-border hover:border-[#d8ff3e]/60"
           }`}
           style={{ fontFamily: "var(--font-display)" }}
         >
@@ -1335,10 +1115,10 @@ function FilterBar({
               key={item}
               type="button"
               onClick={() => onCategoryChange(item)}
-              className={`text-[13px] px-3 py-1.5 rounded-full border transition ${
+              className={`shrink-0 text-[11px] sm:text-[13px] px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full border transition ${
                 active
-                  ? "bg-violet-500/18 text-violet-200 border-violet-500/35"
-                  : "bg-[#151515] text-[#ccc] border-border hover:border-violet-500/35"
+                  ? "bg-[#d8ff3e] text-black border-[#d8ff3e]"
+                  : "bg-[#111] text-[#ccc] border-border hover:border-[#d8ff3e]/60"
               }`}
               style={{ fontFamily: "var(--font-display)" }}
             >
@@ -1349,7 +1129,7 @@ function FilterBar({
       </div>
 
       <div
-        className="mt-3 text-xs"
+        className="max-w-4xl mx-auto text-xs mt-2"
         style={{ color: "#999", fontFamily: "var(--font-mono)" }}
       >
         Showing {total} fest{total !== 1 ? "s" : ""}
@@ -1365,7 +1145,7 @@ type View = "home" | "post";
 
 export default function App() {
   const [view, setView] = useState<View>("home");
-  const [selectedFest, setSelectedFest] = useState<Fest | null>(null);
+  const navigate = useNavigate();
   const [district, setDistrict] = useState("All Districts");
   const [category, setCategory] = useState<"All" | Category>("All");
   const [query, setQuery] = useState("");
@@ -1428,38 +1208,19 @@ export default function App() {
   };
 
   const openDetail = (fest: Fest) => {
-    savedScroll.current = window.scrollY;
-    setSelectedFest(fest);
+    navigate(`/fest/${fest.id}`);
   };
-  const closeDetail = useCallback(() => {
-    setSelectedFest(null);
-    requestAnimationFrame(() => window.scrollTo(0, savedScroll.current));
-  }, []);
-
-  useEffect(() => {
-    document.body.style.overflow =
-      selectedFest || view === "post" ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [selectedFest, view]);
-
   return (
     <div
       className="relative overflow-hidden"
-      style={{ backgroundColor: "#0a0a0a", minHeight: "100vh" }}
+      style={{ backgroundColor: "#000", minHeight: "100vh" }}
     >
-      <div className="pointer-events-none absolute inset-0 overflow-hidden hidden sm:block">
-        <div className="absolute -top-40 -left-40 h-125 w-125 rounded-full bg-purple-600/15 blur-[120px]" />
-        <div className="absolute top-1/3 -right-40 h-125 w-125 rounded-full bg-fuchsia-600/8 blur-[120px]" />
-      </div>
-
       <div className="relative z-10">
         <Header onPostClick={openPost} festCount={fests.length} />
 
         <section
           id="home"
-          className="pt-24 pb-6 px-4 sm:px-6 lg:px-16 text-center"
+          className="pt-32 pb-10 px-4 sm:px-6 lg:px-16 text-center"
         >
           <p
             className="text-[11px] tracking-[0.18em] uppercase mb-3"
@@ -1476,7 +1237,7 @@ export default function App() {
               letterSpacing: "-0.02em",
             }}
           >
-            Discover the <span style={{ color: "#a78bfa" }}>Fests</span>
+            Find your next<br /><span style={{ color: "#d8ff3e" }}>great fest.</span>
           </h1>
           <p
             className="text-sm max-w-sm mx-auto"
@@ -1501,7 +1262,11 @@ export default function App() {
           total={filtered.length}
         />
 
-        <div className="px-3 pt-4 pb-24 max-w-6xl mx-auto">
+        <div className="px-4 pt-8 pb-24 max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-4 px-1">
+            <h2 className="text-white text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>Upcoming festivals</h2>
+            <span className="text-xs text-[#777]" style={{ fontFamily: "var(--font-mono)" }}>CURATED FOR KERALA</span>
+          </div>
           {loading ? (
             <div
               className="text-center py-24"
@@ -1554,26 +1319,22 @@ export default function App() {
             />
           </svg>
         </button>
-
-        {selectedFest && (
-          <DetailModal fest={selectedFest} onClose={closeDetail} />
-        )}
-
         {view === "post" && <PostForm onClose={closePost} />}
       </div>
 
       <section
-        className="px-4 sm:px-6 lg:px-16 pt-14 pb-16"
+        className="px-4 sm:px-6 lg:px-16 pt-14 pb-8"
         style={{ borderTop: "1px solid #1e1e1e" }}
       >
-        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-[1.1fr_.9fr] gap-4">
           <div
             id="support"
             className="rounded-2xl p-6"
             style={{ background: "#111", border: "1px solid #2a2a2a" }}
           >
+            <p className="text-xs tracking-[.16em] text-[#ffdd55] mb-3" style={{ fontFamily: "var(--font-mono)" }}>KEEP THE CALENDAR GOING</p>
             <h2
-              className="text-white font-bold text-lg mb-3"
+              className="text-white font-bold text-2xl mb-3"
               style={{ fontFamily: "var(--font-display)" }}
             >
               Support
@@ -1582,17 +1343,12 @@ export default function App() {
               className="text-sm leading-7"
               style={{ color: "#999", fontFamily: "var(--font-display)" }}
             >
-              Need help finding the right fest or want to share feedback? Reach
-              out to us at{" "}
-              <a
-                href="mailto:helpfestkerala@gmail.com"
-                className="text-violet-300 underline"
-              >
-                helpfestkerala@gmail.com
-              </a>
-              . We're happy to help with event listings, poster submissions, and
-              campus fest guidance.
+              Love discovering fests? Help us keep Fest Kerala free and independent for every campus.
             </p>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <a href="https://www.buymeacoffee.com/yourusername" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[#ffdd55] text-black px-4 py-2.5 text-sm font-bold">Buy us a coffee <span>→</span></a>
+              <a href="mailto:helpfestkerala@gmail.com" className="text-sm text-[#d8ff3e] hover:text-white transition">Help needed? <span className="underline">helpfestkerala@gmail.com</span></a>
+            </div>
           </div>
 
           <div
@@ -1619,11 +1375,14 @@ export default function App() {
               className="text-sm leading-7"
               style={{ color: "#999", fontFamily: "var(--font-display)" }}
             >
-              This site is built to keep event discovery simple, accessible, and
-              beautifully presented for every fest season.
+              Built for curious students, dedicated organisers, and every unforgettable fest season.
             </p>
           </div>
         </div>
+        <footer className="max-w-6xl mx-auto mt-12 pt-6 flex flex-col sm:flex-row gap-3 justify-between text-xs text-[#666]" style={{ borderTop: "1px solid #1e1e1e", fontFamily: "var(--font-mono)" }}>
+          <span>© 2026 FEST KERALA. MADE FOR CAMPUS CULTURE.</span>
+          <a href="mailto:helpfestkerala@gmail.com" className="hover:text-white">helpfestkerala@gmail.com</a>
+        </footer>
       </section>
     </div>
   );
