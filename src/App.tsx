@@ -855,7 +855,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   onChange={(e) => set("description", e.target.value)}
                 />
                 <p className="text-xs mt-1" style={{ color: "#555", fontFamily: "var(--font-mono)" }}>
-                  {form.description.length}/100
+                  {form.description.length}/200
                 </p>
           </Field>
 
@@ -965,28 +965,6 @@ function Header({
             About
           </a>
         </nav>
-        <a          
-          href="https://www.buymeacoffee.com/yourusername"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Buy me a coffee"
-          className="w-8 h-8 flex items-center justify-center rounded-full shrink-0"
-          style={{
-            background: "#1a1a1a",
-            border: "1px solid #2a2a2a",
-            color: "#ffdd55",
-          }}
-        >
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M4 8h13a3 3 0 0 1 0 6h-1M4 8v9a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3v-3M4 8l1-4h9l1 4"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </a>
         <button
           onClick={onPostClick}
           className="flex items-center gap-1.5"
@@ -1265,7 +1243,6 @@ export default function App() {
         <div className="px-4 pt-8 pb-24 max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-4 px-1">
             <h2 className="text-white text-xl font-bold" style={{ fontFamily: "var(--font-display)" }}>Upcoming festivals</h2>
-            <span className="text-xs text-[#777]" style={{ fontFamily: "var(--font-mono)" }}>CURATED FOR KERALA</span>
           </div>
           {loading ? (
             <div

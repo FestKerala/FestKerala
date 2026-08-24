@@ -55,23 +55,38 @@ export default function FestDetail() {
   const shareFest = async () => {
     if (!fest) return;
     const shareText = `${fest.fest_name} at ${fest.college_name} — ${formatDateRange(fest.start_date, fest.end_date)}, ${fest.district}.`;
+    const shareUrl = window.location.href;
     const shareData = {
       title: `${fest.fest_name} | Fest Kerala`,
       text: shareText,
-      url: window.location.href,
+      url: shareUrl,
     };
     try {
-      if (navigator.share) {
+      if (typeof navigator.share === "function") {
         await navigator.share(shareData);
         return;
       }
-      await navigator.clipboard.writeText(`${shareText}\n${window.location.href}`);
+    } catch (error) {
+      if ((error as DOMException).name === "AbortError") return;
+    }
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const input = document.createElement("textarea");
+        input.value = shareUrl;
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        input.remove();
+      }
       setShareStatus("copied");
       setTimeout(() => setShareStatus("idle"), 2000);
     } catch (error) {
-      if ((error as DOMException).name !== "AbortError") {
-        console.error("Unable to share fest", error);
-      }
+      console.error("Unable to share fest", error);
     }
   };
 
@@ -194,18 +209,20 @@ export default function FestDetail() {
           </p>
         </div>
 
+        <div className="flex items-center gap-3">
         <a
           href={fest.registration_link}
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-glow block text-center w-full sm:w-auto sm:inline-block sm:min-w-64"
-          style={{ display: "block", textDecoration: "none", padding: "14px 20px", borderRadius: 999, fontSize: 14 }}
+          className="btn-glow inline-flex flex-1 items-center justify-center text-center whitespace-nowrap"
+          style={{ textDecoration: "none", padding: "14px 16px", borderRadius: 999, fontSize: 14 }}
         >
           Register / Event Link →
         </a>
-        <button onClick={shareFest} className="mt-3 sm:mt-0 sm:ml-3 px-5 py-3 rounded-full text-sm font-semibold text-white border border-[#333] hover:border-[#d8ff3e] transition" style={{ fontFamily: "var(--font-display)" }}>
+        <button onClick={shareFest} className="shrink-0 px-4 py-3 rounded-full text-sm font-semibold text-white border border-[#333] hover:border-[#d8ff3e] transition whitespace-nowrap" style={{ fontFamily: "var(--font-display)" }}>
           {shareStatus === "copied" ? "Link copied" : "Share fest"}
         </button>
+        </div>
         </section>
       </div>
     </div>
