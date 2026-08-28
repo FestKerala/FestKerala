@@ -114,10 +114,12 @@ const reject = async () => {
     return;
   setBusy("reject");
   setError(null);
-  const { error } = await supabase
-    .from("fests")
-    .update({ status: "rejected" })
-    .eq("id", fest.id);
+  await supabase.from("fest_removals").insert({
+    id: fest.id,
+    fest_name: fest.fest_name,
+    reason: "rejected",
+  });
+  const { error } = await supabase.from("fests").delete().eq("id", fest.id);
   setBusy(null);
   if (error) {
     setError("Reject failed. Try again.");
@@ -128,17 +130,17 @@ const reject = async () => {
 
 const unlist = async () => {
   if (
-    !confirm(
-      `Unlist "${fest.fest_name}"? It will be removed from the public site.`,
-    )
+    !confirm(`Unlist "${fest.fest_name}"? It will be removed from the public site.`)
   )
     return;
   setBusy("unlist");
   setError(null);
-  const { error } = await supabase
-    .from("fests")
-    .update({ status: "unlisted" })
-    .eq("id", fest.id);
+  await supabase.from("fest_removals").insert({
+    id: fest.id,
+    fest_name: fest.fest_name,
+    reason: "unlisted",
+  });
+  const { error } = await supabase.from("fests").delete().eq("id", fest.id);
   setBusy(null);
   if (error) {
     setError("Unlist failed. Try again.");
