@@ -9,6 +9,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { supabase } from "./lib/supabase";
 import logoUrl from "./logo.svg";
+import QRCode from "qrcode";
 import {
   DISTRICTS,
   TAG_STYLES,
@@ -1117,6 +1118,194 @@ function FilterBar({
   );
 }
 
+// SupportUPI component
+
+const SUPPORT_AMOUNTS = [49, 99, 199];
+const UPI_VPA = "hg6674763@okhdfcbank"; // TODO: replace with your real UPI ID
+
+function SupportUPI() {
+  const [amount, setAmount] = useState<number | "custom">(99);
+  const [customAmount, setCustomAmount] = useState("");
+  const [qrUrl, setQrUrl] = useState("");
+  const [wentAway, setWentAway] = useState(false);
+  const [markedPaid, setMarkedPaid] = useState(false);
+
+  const finalAmount = amount === "custom" ? Number(customAmount) || 0 : amount;
+  const upiLink = `upi://pay?pa=${UPI_VPA}&pn=FestKerala&am=${finalAmount}&cu=INR&tn=Support%20FestKerala`;
+
+  useEffect(() => {
+    if (finalAmount > 0) {
+      QRCode.toDataURL(upiLink, { margin: 1, width: 200 }).then(setQrUrl);
+    }
+  }, [upiLink, finalAmount]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) setWentAway(true);
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, []);
+
+  if (markedPaid) {
+    return (
+      <p style={{ color: "#d8ff3e", fontFamily: "var(--font-display)" }}>
+        Thank you for supporting Fest Kerala! 💛
+      </p>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex gap-2 mb-3">
+        {SUPPORT_AMOUNTS.map((a) => (
+          <button
+            key={a}
+            onClick={() => setAmount(a)}
+            className={`px-3 py-1.5 rounded-full text-sm border ${
+              amount === a
+                ? "bg-[#d8ff3e] text-black border-[#d8ff3e]"
+                : "border-[#333] text-[#ccc]"
+            }`}
+          >
+            ₹{a}
+          </button>
+        ))}
+        <button
+          onClick={() => setAmount("custom")}
+          className={`px-3 py-1.5 rounded-full text-sm border ${
+            amount === "custom"
+              ? "bg-[#d8ff3e] text-black border-[#d8ff3e]"
+              : "border-[#333] text-[#ccc]"
+          }`}
+        >
+          Other
+        </button>
+      </div>
+
+      {amount === "custom" && (
+        <input
+          className="field mb-3 w-32"
+          type="number"
+          placeholder="₹ amount"
+          value={customAmount}
+          onChange={(e) => setCustomAmount(e.target.value)}
+        />
+      )}
+
+      {qrUrl && finalAmount > 0 && (
+        <img src={qrUrl} alt="UPI QR code" className="rounded-lg mb-3" />
+      )}
+
+      <a
+        href={upiLink}
+        className="inline-block rounded-full bg-[#d8ff3e] text-black px-4 py-2.5 text-sm font-bold mb-3"
+      >
+        Pay ₹{finalAmount} via UPI app →
+      </a>
+
+      {wentAway && (
+        <div className="mb-3">
+          <p className="text-sm text-[#999] mb-2">
+            Welcome back — did it go through?
+          </p>
+          <button
+            onClick={() => setMarkedPaid(true)}
+            className="text-sm px-3 py-1.5 rounded-full border border-[#4ade80] text-[#4ade80]"
+          >
+            Yes, I paid
+          </button>
+        </div>
+      )}
+
+      <p
+        className="text-xs"
+        style={{ color: "#666", fontFamily: "var(--font-mono)" }}
+      >
+        We're a student project and can't afford Razorpay/Stripe fees yet —
+        so this works on trust, not verification. If you tap "I paid," that's
+        good enough for us. 💛
+      </p>
+    </div>
+  );
+}
+
+// SupportSection component
+
+function SupportSection() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open]);
+
+  return (
+    <>
+      <p className="text-xs tracking-[.16em] text-[#ffdd55] mb-3" style={{ fontFamily: "var(--font-mono)" }}>KEEP THE CALENDAR GOING</p>
+      <h2
+        className="text-white font-bold text-2xl mb-3"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        Support
+      </h2>
+      <p
+        className="text-sm leading-7 mb-5"
+        style={{ color: "#999", fontFamily: "var(--font-display)" }}
+      >
+        Love discovering fests? Help us keep Fest Kerala free and independent for every campus.
+      </p>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-2 rounded-full bg-[#d8ff3e] text-black px-4 py-2.5 text-sm font-bold"
+        >
+          Support us <span>→</span>
+        </button>
+        <a
+          href="mailto:helpfestkerala@gmail.com"
+          className="text-sm text-[#d8ff3e] hover:text-white transition"
+        >
+          Help needed? <span className="underline">helpfestkerala@gmail.com</span>
+        </a>
+      </div>
+
+      {open && (
+        <div className="modal-backdrop" onClick={() => setOpen(false)}>
+          <div
+            className="relative w-full max-w-sm rounded-2xl p-6"
+            style={{ background: "#111", border: "1px solid #2a2a2a" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full"
+              style={{ background: "#1a1a1a", color: "#888", border: "1px solid #2a2a2a" }}
+              aria-label="Close"
+            >
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+                <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              </svg>
+            </button>
+            <h3
+              className="text-white font-bold text-lg mb-4"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Support Fest Kerala
+            </h3>
+            <SupportUPI />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 // App component
 
 type View = "home" | "post";
@@ -1188,6 +1377,7 @@ export default function App() {
   const openDetail = (fest: Fest) => {
     navigate(`/fest/${fest.id}`);
   };
+  
   return (
     <div
       className="relative overflow-hidden"
@@ -1309,25 +1499,8 @@ export default function App() {
             className="rounded-2xl p-6"
             style={{ background: "#111", border: "1px solid #2a2a2a" }}
           >
-            <p className="text-xs tracking-[.16em] text-[#ffdd55] mb-3" style={{ fontFamily: "var(--font-mono)" }}>KEEP THE CALENDAR GOING</p>
-            <h2
-              className="text-white font-bold text-2xl mb-3"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Support
-            </h2>
-            <p
-              className="text-sm leading-7"
-              style={{ color: "#999", fontFamily: "var(--font-display)" }}
-            >
-              Love discovering fests? Help us keep Fest Kerala free and independent for every campus.
-            </p>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <a href="https://www.buymeacoffee.com/yourusername" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[#ffdd55] text-black px-4 py-2.5 text-sm font-bold">Buy us a coffee <span>→</span></a>
-              <a href="mailto:helpfestkerala@gmail.com" className="text-sm text-[#d8ff3e] hover:text-white transition">Help needed? <span className="underline">helpfestkerala@gmail.com</span></a>
-            </div>
+            <SupportSection />
           </div>
-
           <div
             id="about"
             className="rounded-2xl p-6"
