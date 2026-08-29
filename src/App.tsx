@@ -1257,7 +1257,7 @@ function SupportSection() {
         className="text-sm leading-7 mb-5"
         style={{ color: "#999", fontFamily: "var(--font-display)" }}
       >
-        Love discovering fests? Help us keep Fest Kerala free and independent for every campus.
+        Love discovering fests? Help us keep Fest Kerala free and independent for every campus!.
       </p>
 
       <div className="flex flex-wrap items-center gap-3">
