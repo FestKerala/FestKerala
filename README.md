@@ -31,27 +31,6 @@ Colleges and organizers submit their fest — poster, dates, registration link, 
 | Spam protection | Cloudflare Turnstile |
 | Hosting | Vercel |
 
-## Project structure
-
-```
-src/
-├── App.tsx                 # Home page: header, filters, masonry grid, post form, support section
-├── FestDetail.tsx          # Per-fest detail page (/fest/:id)
-├── types.ts                # Fest type, district/category constants, tag styling
-├── main.tsx                # Router setup
-├── index.css               # Global styles, Tailwind theme, Kerala-motif background
-├── pages/
-│   ├── Admin.tsx            # Auth gate → login or dashboard
-│   ├── AdminLogin.tsx        # Admin sign-in form
-│   ├── AdminDashboard.tsx    # Moderation queue: pending/live tabs, inline edit, bulk actions
-│   └── StatusLookup.tsx      # Public status page for organizers
-├── lib/
-│   ├── supabase.ts          # Supabase client
-│   └── useAuth.ts           # Admin session hook
-supabase/
-└── functions/
-    └── submit-fest/
-        └── index.ts          # Edge Function: verifies Turnstile token, validates, inserts as 'pending'
 ```
 
 ## Architecture notes
@@ -62,51 +41,6 @@ supabase/
 
 **Reject and unlist are hard deletes**, not status changes — a Postgres `CHECK` constraint on `fests.status` only allows `'pending'`/`'approved'`, so anything else fails silently on `.update()`. Deletes are audited via a `fest_removals` log table, written *before* the delete so a mid-request failure can't lose the record.
 
-## Local development
-
-```bash
-npm install
-cp .env.example .env   # fill in VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
-npm run dev
-```
-
-Required environment variables (from your Supabase project → Settings → API):
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-
-Edge Function secrets (set via `supabase secrets set`, never committed):
-- `TURNSTILE_SECRET_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-
-## Deploying an Edge Function change
-
-```bash
-supabase functions deploy submit-fest
-```
-Edge Functions don't hot-reload from a normal push — any change to `supabase/functions/submit-fest/index.ts` needs an explicit redeploy.
-
-## Contributing workflow
-
-1. Branch off `main` (no direct pushes)
-2. Push your branch, open a PR
-3. **Check the Vercel preview URL Vercel auto-comments on the PR before merging** — this catches issues that a local dev server won't
-4. Merge via GitHub, then `git checkout main && git pull`
-
-## Roadmap (V2)
-
-- Magic edit/status links via a `manage_token` UUID (possession-as-credential, no second auth system)
-- Resubmission flow for rejected/expired fests
-- District digest or demand-side recommendations
-- Basic organizer analytics through the magic link
-- Deadline-aware urgency badges
-- Duplicate/spam flagging in the moderation queue
-- Improved empty-state design (currently the highest-priority UX gap)
-
-## Known limitations
-
-- The UPI support flow is trust-based, not verified — there's no payment gateway confirming a donation actually succeeded
-- No `manage_token` yet, so organizers can't self-edit a submission after it's sent
-- Storage bucket relies on client-side file-size/MIME validation rather than a Storage-level RLS policy (Supabase Storage doesn't populate metadata at INSERT time, so metadata-based RLS isn't reliable here)
 
 ## License / credits
 
