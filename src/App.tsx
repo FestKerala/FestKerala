@@ -453,8 +453,8 @@ function PostForm({ onClose }: { onClose: () => void }) {
       }
     }
     if (!form.description.trim()) e.description = "Required";
-    if (form.description.trim().length > 100)
-      e.description = "Keep it under 100 characters";
+    if (form.description.trim().length > 300)
+      e.description = "Keep it under 300 characters";
 
     if (!form.poster_file) e.poster_file = "Please upload a poster image.";
     return e;
@@ -856,7 +856,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                   onChange={(e) => set("description", e.target.value)}
                 />
                 <p className="text-xs mt-1" style={{ color: "#555", fontFamily: "var(--font-mono)" }}>
-                  {form.description.length}/200
+                  {form.description.length}/300
                 </p>
           </Field>
 
