@@ -112,6 +112,20 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
+        // 4. Notify admins on Discord (best-effort — don't fail the submission
+    // if this fetch fails, e.g. webhook down or misconfigured)
+    const webhookUrl = Deno.env.get('DISCORD_WEBHOOK_URL')
+    if (webhookUrl) {
+      fetch(webhookUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `📥 New fest submitted for review: **${fest_name}** (${college_name}, ${district})\nhttps://fest-kerala.vercel.app/admin`,
+        }),
+      }).catch((err) => console.error('Discord notify failed:', err))
+    }
+
+
     return new Response(JSON.stringify({ data }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
