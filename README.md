@@ -2,7 +2,7 @@
 
 **Pinterest for college fests.** A free, ad-free, community-driven directory of college festivals across all 14 districts of Kerala — cultural, technical, arts, music, dance, and business events, all in one place.
 
-Live at: [fest-kerala.vercel.app](https://fest-kerala.vercel.app)
+Live at: [fest-kerala.vercel.app](https://fest-kerala.in)
 
 ---
 
